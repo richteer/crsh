@@ -86,10 +86,26 @@ int tk_free(task_t * tk)
 	close(tk->out);
 	close(tk->in);
 	close(tk->err);
+
+	if (tk->active) {
+		kill(tk->pid, SIGKILL);
+	}
+
 	free(tk->command);
 	for (c = tk->argv; *c != NULL; c++) free(*c);
 	free(tk->argv);	
 	free(tk);
+
+	return 0;
+}
+
+int tk_freeall(task_t * tk)
+{
+	task_t * t, *tmp;
+	for (t = tmp = tk; t != NULL;) {
+		t = tmp->pipe;
+		tk_free(tmp);
+	}
 
 	return 0;
 }

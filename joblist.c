@@ -192,7 +192,7 @@ int jl_free_nd(jnode_t * nd)
 	}
 
 	if (nd->task)
-		tk_free(nd->task);
+		tk_freeall(nd->task);
 	// TODO: Kill process?
 	free(nd);
 	

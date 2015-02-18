@@ -7,6 +7,7 @@
 
 int inc_cd(state_t *, task_t *);
 int inc_fg(state_t *, task_t *);
+int inc_term(state_t *, task_t *);
 int inc_jobs(state_t *, task_t *);
 int inc_exit(state_t *, task_t *);
 int inc_history(state_t *, task_t *);
@@ -19,6 +20,7 @@ struct in_cmd_s {
 struct in_cmd_s in_cmdlist[] = {
 	{ "cd", inc_cd },
 	{ "fg", inc_fg },
+	{ "term", inc_term },
 	{ "exit", inc_exit },
 	{ "jobs", inc_jobs },
 	{ "history", inc_history },
@@ -79,6 +81,26 @@ int inc_fg(state_t * st, task_t * tk)
 	for (t = tk; t != NULL; t = tk->pipe) {
 		kill(t->pid, SIGCONT);
 	}
+
+	return 0;
+}
+
+int inc_term(state_t * st, task_t * tk)
+{
+	jnode_t * nd;
+
+	if (tk->argv[1] == NULL) {
+		printf("Need job id to terminate\n");
+		return 1;
+	}
+		
+	nd = jl_find_jid(st->jobs, atoi(tk->argv[1]));
+	if (nd == NULL) {
+		printf("Invalid job id\n");
+		return 2;
+	}
+
+	jl_rem_node(st->jobs, nd);
 
 	return 0;
 }
