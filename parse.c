@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include "parse.h"
 #include "error.h"
 #include "task.h"
@@ -13,10 +14,14 @@
 #define ST_COMMAND  0x2
 #define ST_ARG      0x3
 #define ST_ARGSPACE 0x4
+#define ST_REDIRECT 0x5
 
 static task_t * gentask(char * line)
 {
 	int state = ST_START;
+	int fd = -1;
+	int oflags = 0;
+	int * stream;
 	task_t * tk;
 	char * c, *d;
 	char * cmd_start;
@@ -24,6 +29,7 @@ static task_t * gentask(char * line)
 	char ** argv;
 	int arglength = 4;
 	int numargs = 0;
+	char * redir;
 
 	argv = calloc(1,sizeof(char*) * arglength);
 	tk = calloc(1,sizeof(task_t));
@@ -92,9 +98,34 @@ static task_t * gentask(char * line)
 					tk->bg = 1;
 					goto end;
 				}
+				else if ((*c == '>') || (*c == '<') || (*c == '#')) {
+					redir = c;
+					state = ST_REDIRECT;
+				}
 				else {
 					arg_begin = c;
 					state = ST_ARG;
+				}
+				break;
+			case ST_REDIRECT:
+				if ((*c == ' ') || (*(c+1) == '\0')) {
+					if (*c == ' ') *c = '\0'; // Clean this
+					switch(*redir) {
+						case '<': oflags = O_RDONLY; stream = &tk->in; break;
+						case '>': oflags = O_WRONLY | O_CREAT; stream = &tk->out; break;
+						case '#': oflags = O_WRONLY | O_CREAT; stream = &tk->err; break;
+					}
+
+					fd = open(redir+1, oflags, 0644);
+					if (fd == -1) {
+						printf("Could not open file '%s'\n", redir+1);
+						free(argv); // FIXME: Leaks any arguments
+						free(tk->command);
+						free(tk);
+						return NULL;
+					}
+					*stream = fd;
+					state = ST_ARGSPACE;
 				}
 				break;
 			default:
