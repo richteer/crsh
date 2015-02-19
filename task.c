@@ -72,7 +72,7 @@ int tk_init(void * moo, task_t * tk)
 	jl_app_node(st->jobs, job);
 	if (!tk->bg) {
 		st->fg = job->jid;
-	}	
+	}
 
 	tk_run(st, tk);
 	return 0; // TODO: Change this
@@ -83,14 +83,9 @@ int tk_free(task_t * tk)
 {
 	char ** c;
 
-	close(tk->out);
-	close(tk->in);
-	close(tk->err);
-
-	if (tk->active) {
-		kill(tk->pid, SIGKILL);
-	}
-
+	tk_setinactive(tk);
+	
+	//kill(tk->pid, SIGKILL);
 	free(tk->command);
 	for (c = tk->argv; *c != NULL; c++) free(*c);
 	free(tk->argv);	
@@ -103,6 +98,7 @@ int tk_freeall(task_t * tk)
 {
 	task_t * t, *tmp;
 	for (t = tmp = tk; t != NULL;) {
+		tmp = t;
 		t = tmp->pipe;
 		tk_free(tmp);
 	}
@@ -110,3 +106,11 @@ int tk_freeall(task_t * tk)
 	return 0;
 }
 
+int tk_setinactive(task_t * tk)
+{
+	tk->active = 0;
+	if (-1 != tk->out) close(tk->out);
+	if (-1 != tk->in)  close(tk->in);
+	if (-1 != tk->err) close(tk->err);
+	return 0;
+}

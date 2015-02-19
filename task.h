@@ -19,4 +19,6 @@ typedef struct task_s {
 int tk_init(void *, task_t *);
 int tk_free(task_t *);
 int tk_freeall(task_t *);
+int tk_setinactive(task_t *);
+
 #endif

@@ -88,19 +88,24 @@ int inc_fg(state_t * st, task_t * tk)
 int inc_term(state_t * st, task_t * tk)
 {
 	jnode_t * nd;
+	task_t * t;
 
 	if (tk->argv[1] == NULL) {
 		printf("Need job id to terminate\n");
 		return 1;
 	}
-		
+
 	nd = jl_find_jid(st->jobs, atoi(tk->argv[1]));
 	if (nd == NULL) {
 		printf("Invalid job id\n");
 		return 2;
 	}
 
-	jl_rem_node(st->jobs, nd);
+//	jl_rem_node(st->jobs, nd);
+
+	for (t = nd->task; t != NULL; t = t->pipe) {
+		kill(t->pid, SIGKILL);
+	}
 
 	return 0;
 }
