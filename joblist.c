@@ -191,8 +191,9 @@ int jl_free_nd(jnode_t * nd)
 		return 1;
 	}
 
-	if (nd->task)
+	if (nd->task) {
 		tk_freeall(nd->task);
+	}
 	// TODO: Kill process?
 	free(nd);
 	
@@ -237,10 +238,7 @@ int jl_set_inactive_pid(jnode_t *nd, int pid)
 
 	for (tk = nd->task; tk != NULL; tk = tk->pipe) {
 		if (tk->pid == pid) {
-			tk->active = 0;
-			close(tk->out);
-			close(tk->in);
-			close(tk->err);
+			tk_setinactive(tk);
 			return 0;
 		}		
 	}
@@ -248,6 +246,8 @@ int jl_set_inactive_pid(jnode_t *nd, int pid)
 	return -1;
 }
 
+
+// Deprecated
 int jl_clear_pid(jlist_t * jl, jnode_t * nd, int pid)
 {
 	int ret = 0;	
