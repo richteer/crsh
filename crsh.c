@@ -9,10 +9,28 @@
 #include "error.h"
 #include "parse.h"
 
+#define CL_RED     "\x1b[31m"
+#define CL_GREEN   "\x1b[32m"
+#define CL_YELLOW  "\x1b[33m"
+#define CL_BLUE    "\x1b[34m"
+#define CL_MAGENTA "\x1b[35m"
+#define CL_CYAN    "\x1b[36m"
+#define CL_RESET   "\x1b[0m"
+
+char color_cycle[][10] = {
+	CL_RED,
+	CL_YELLOW,
+	CL_GREEN,
+	CL_CYAN,
+	CL_BLUE,
+	CL_MAGENTA,
+};
+
 state_t state = {};
 
 char * get_prompt(state_t * foo)
 {
+	static int curcolor = 0;
 	char * prompt;
 	int offset;
 	prompt = calloc(1,256);
@@ -24,8 +42,10 @@ char * get_prompt(state_t * foo)
 		}
 	}
 
-	sprintf(prompt,"[%s@%s %s]$ ", state.username, state.hostname, state.dirn + offset);
+	sprintf(prompt,"%s[%s@%s %s]$ %s", color_cycle[curcolor], state.username, state.hostname, state.dirn + offset, CL_RESET);
 	//strcpy(prompt,">>> ");
+	curcolor++;
+	curcolor = curcolor % ((sizeof(color_cycle)/sizeof(char*))-1);
 	return prompt;
 }
 
