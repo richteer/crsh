@@ -21,7 +21,7 @@ static task_t * gentask(char * line)
 	char * cmd_start;
 	char * arg_begin;
 	char ** argv;
-	int arglength = 2;	
+	int arglength = 4;
 	int numargs = 0;
 
 	argv = calloc(1,sizeof(char*) * arglength);
