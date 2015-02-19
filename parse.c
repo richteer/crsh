@@ -1,3 +1,4 @@
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -17,7 +18,7 @@ static task_t * gentask(char * line)
 {
 	int state = ST_START;
 	task_t * tk;
-	char * c;
+	char * c, *d;
 	char * cmd_start;
 	char * arg_begin;
 	char ** argv;
@@ -35,9 +36,18 @@ static task_t * gentask(char * line)
 		switch(state) {
 			case ST_START:
 				if  (*c == '!') {
-					// TODO: This
-					printf("Not implemented...\n");
-					return NULL;
+					tk->command = calloc(1,3);
+					strcpy(tk->command, "rp");
+					for (d = ++c; ;d++) {
+						if (isdigit(*d)) continue;
+						if (isspace(*d)) { *d = '\0'; break; }
+						if (*d == '\0') break;
+						printf("Error?\n");
+					}
+					argv[1] = calloc(1, strlen(c));
+					strcpy(argv[1], c);
+					numargs = 1;
+					goto end;
 				}
 				else if (*c != ' ') {
 					state = ST_COMMAND;

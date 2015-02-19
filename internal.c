@@ -4,9 +4,11 @@
 #include <signal.h>
 #include <unistd.h>
 #include "internal.h"
+#include "parse.h"
 
 int inc_cd(state_t *, task_t *);
 int inc_fg(state_t *, task_t *);
+int inc_rp(state_t *, task_t *);
 int inc_term(state_t *, task_t *);
 int inc_jobs(state_t *, task_t *);
 int inc_exit(state_t *, task_t *);
@@ -20,6 +22,7 @@ struct in_cmd_s {
 struct in_cmd_s in_cmdlist[] = {
 	{ "cd", inc_cd },
 	{ "fg", inc_fg },
+	{ "rp", inc_rp },
 	{ "term", inc_term },
 	{ "exit", inc_exit },
 	{ "jobs", inc_jobs },
@@ -82,6 +85,86 @@ int inc_fg(state_t * st, task_t * tk)
 		kill(t->pid, SIGCONT);
 	}
 
+	return 0;
+}
+
+int inc_rp(state_t * st, task_t * tk)
+{
+	int event, i, n, count;
+	char * c;
+	FILE * histfile;
+	char * buffer;
+	char * line;
+	int bufsz;
+	int mod;
+	int termnum;
+
+	if (tk->argv[1] == NULL) {
+		printf("Need event to repeat\n");
+		return 1;
+	}
+
+	event = atoi(tk->argv[1]);
+
+	histfile = fopen("/tmp/.crsh_history","r");
+
+	fseek(histfile, 0, SEEK_END);
+	bufsz = ftell(histfile);
+	rewind(histfile);
+
+	buffer = malloc(bufsz);
+	fread(buffer, 1, bufsz, histfile);
+
+	fclose(histfile);
+
+	for (i = 0; i < bufsz; i++) {
+		if (buffer[i] == '\n') buffer[i] = '\0';
+	}
+
+	if (event < 0) {
+		count = -2; // So that `rp -1` is not self-referential
+		event = abs(event);
+		for (c = buffer + bufsz - 1; c >= buffer; c--) {
+			if (*c == '\0') {
+				count++;
+				c--;
+			}
+			if (count == event) {
+				c += 2;
+				goto done;
+			}
+		}
+		printf("Could not find that event\n");
+		free(buffer);
+		return 4;
+		
+	}
+	else if (event > 0) {
+		count = 1;
+		for (c = buffer; c < (buffer + bufsz); c++) {
+			if (*c == '\0') {
+				count++;
+				c++;
+			}
+			if (count == event) {
+				goto done;
+			}
+		}
+		printf("Could not find that event\n");
+		free(buffer);
+		return 2;
+	}
+	else {
+		printf("History is counted, not indexed\n");
+		free(buffer);
+		return 3;
+	}
+
+done:	
+	printf("%s\n",c);
+	parse(st, c);
+
+	free(buffer);
 	return 0;
 }
 
