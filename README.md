@@ -1,6 +1,6 @@
 # crsh - the Crappily wRitten SHell
 
-`crsh` is a shell written from scratch (no template code used).
+`crsh` (pronounced "crash") is a shell written from scratch (no template code used).
 Basic `bash`-like use is supported, see the man page (`man ./crsh.1`) for more detailed information.
 
 ## Features
