@@ -98,6 +98,8 @@ int inc_rp(state_t * st, task_t * tk)
 	int bufsz;
 	int mod;
 	int termnum;
+	char * hspath;
+	char * home;
 
 	if (tk->argv[1] == NULL) {
 		printf("Need event to repeat\n");
@@ -106,7 +108,12 @@ int inc_rp(state_t * st, task_t * tk)
 
 	event = atoi(tk->argv[1]);
 
-	histfile = fopen("/tmp/.crsh_history","r");
+	home = getenv("HOME");	
+	hspath = calloc(1,strlen(home) + strlen("/.crsh_history") + 1);
+	sprintf(hspath,"%s/.crsh_history",home);
+
+	histfile = fopen(hspath, "r");
+	free(hspath);
 
 	fseek(histfile, 0, SEEK_END);
 	bufsz = ftell(histfile);
@@ -215,8 +222,15 @@ int inc_history(state_t * st, task_t * tk)
 	int i;
 	int lnum = 0;
 	char * c;
+	char * hspath;
+	char * home;
 
-	histfile = fopen("/tmp/.crsh_history", "r");
+	home = getenv("HOME");	
+	hspath = calloc(1,strlen(home) + strlen("/.crsh_history") + 1);
+	sprintf(hspath,"%s/.crsh_history",home);
+
+	histfile = fopen(hspath, "r");
+	free(hspath);
 
 	if (histfile == NULL) {
 		printf("Could not open ~/.crsh_history\n");

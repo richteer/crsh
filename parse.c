@@ -162,8 +162,17 @@ end:
 static int writetohistory(task_t * tk)
 {
 	char ** c;
-	FILE * histfile = fopen("/tmp/.crsh_history","a");
+	char * hspath;
+	char * home;
+	FILE * histfile;
 
+	home = getenv("HOME");	
+	hspath = calloc(1,strlen(home) + strlen("/.crsh_history") + 1);
+	sprintf(hspath,"%s/.crsh_history",home);
+
+	histfile = fopen(hspath, "a");
+	free(hspath);
+	
 	if (histfile == NULL) {
 		return -1;
 	}
