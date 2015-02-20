@@ -43,7 +43,6 @@ char * get_prompt(state_t * foo)
 	}
 
 	sprintf(prompt,"%s[%s@%s %s]$ %s", color_cycle[curcolor], state.username, state.hostname, state.dirn + offset, CL_RESET);
-	//strcpy(prompt,">>> ");
 	curcolor++;
 	curcolor = curcolor % ((sizeof(color_cycle)/sizeof(char*))-1);
 	return prompt;
@@ -51,17 +50,6 @@ char * get_prompt(state_t * foo)
 
 void handle_sigchld(int signum, siginfo_t * si, void * wat)
 {
-	//printf("Received %d from %d\n", si->si_signo, si->si_pid);
-//	printf("Child %d ended\n", si->si_pid);
-/*	jnode_t * job = jl_find_pid(state.jobs, si->si_pid);
-	if (job) {
-		if (jl_clear_pid(state.jobs, job, si->si_pid)) state.fg = -1;
-		jl_rem_node(state.jobs, job);
-	}
-	else {
-		printf("Uhhh... job not found. Was this a piped task?\n");
-	}
-*/	//jl_print(state.jobs);
 	jnode_t * nd = jl_find_pid(state.jobs, si->si_pid);
 	if (nd == NULL) {
 		printf("Could not find pid...?\n");
@@ -70,7 +58,6 @@ void handle_sigchld(int signum, siginfo_t * si, void * wat)
 
 	jl_set_inactive_pid(nd, si->si_pid);
 	if(jl_inactive_nd(nd)) {
-//		printf("fully inactive\n");
 		jl_rem_node(state.jobs, nd);
 		state.fg = -1;
 	}
