@@ -1,22 +1,23 @@
 #ifndef _joblist_h_
 #define _joblist_h_
 #include "task.h"
+
 /* Structs */
+// Doubly linked list node for jobs
 typedef struct jnode_s {
 	struct jnode_s * next;
 	struct jnode_s * prev;
 	task_t * task;
 	int jid;
-// TODO: File descriptors for pipe?
 } jnode_t;
 
+// "Main" list object
 typedef struct jlist_s {
 	jnode_t * head;
 	jnode_t * tail;	
 } jlist_t;
 
 
-// TODO: Add rest of job stuff to args
 jnode_t * jl_new_node();
 
 int jl_next_jid(jlist_t *);

@@ -8,6 +8,7 @@
 #define XOR(a,b) ((!(a) && (b)) || ((a) && !(b)))
 #define BOTH(a,b) ((a->head==b)&&(a->tail==b))
 
+// Verify that the list is sane, returns standard boolean
 static int jl_verify(jlist_t * ls)
 {	
 	if (ls == NULL) {
@@ -21,7 +22,7 @@ static int jl_verify(jlist_t * ls)
 	return 0;
 }
 
-// TODO: Add rest of job stuff to args
+// Allocate and neturn a new node
 jnode_t * jl_new_node(void)
 {
 	jnode_t * ret = malloc(sizeof(jnode_t));
@@ -33,6 +34,7 @@ jnode_t * jl_new_node(void)
 	return ret;
 }
 
+// Return the next non-repeated jid to use
 int jl_next_jid(jlist_t * ls)
 {
 	if (ls == NULL) return -999;
@@ -40,6 +42,7 @@ int jl_next_jid(jlist_t * ls)
 	return ls->tail->jid + 1;
 }
 
+// Append a node to the end of the list
 int jl_app_node(jlist_t * ls, jnode_t * nd)
 {
 	int ret;
@@ -70,6 +73,7 @@ end:
 	return ret;
 }
 
+// Remove a node from the list
 int jl_rem_node(jlist_t * ls, jnode_t * nd)
 {
 	int ret;
@@ -127,7 +131,7 @@ end:
 	return ret;
 }
 
-// TODO: Error below here
+// Find a node in the list with the corresponding jid. Returns NULL on error or not found
 jnode_t * jl_find_jid(jlist_t * ls, int jid)
 {
 	jnode_t * cur;
@@ -147,6 +151,7 @@ jnode_t * jl_find_jid(jlist_t * ls, int jid)
 	return NULL;
 }
 
+// Find a node in the list based on the inscribed task pids.
 jnode_t * jl_find_pid(jlist_t * ls, int pid)
 {
 	
@@ -154,8 +159,6 @@ jnode_t * jl_find_pid(jlist_t * ls, int pid)
 	task_t * tk;
 
 	if ((ls->tail == NULL) && (ls->head == NULL)) return NULL;
-
-	//if (ls->tail->task->pid == pid) return ls->tail;
 
 	for (cur = ls->head; cur != NULL; cur = cur->next) {
 		for (tk = cur->task; tk != NULL; tk = tk->pipe) {
@@ -167,6 +170,7 @@ jnode_t * jl_find_pid(jlist_t * ls, int pid)
 	return NULL;
 }
 
+// Free an entire list
 int jl_free_ls(jlist_t * ls)
 {
 	jnode_t *cur, *prev;
@@ -182,6 +186,7 @@ int jl_free_ls(jlist_t * ls)
 	return 0;
 }
 
+// Free a node. DOES NOT RELINK THE LIST
 int jl_free_nd(jnode_t * nd)
 {
 	task_t * tk, *tmp;
@@ -194,12 +199,12 @@ int jl_free_nd(jnode_t * nd)
 	if (nd->task) {
 		tk_freeall(nd->task);
 	}
-	// TODO: Kill process?
 	free(nd);
 	
 	return 0;
 }
 
+// Print the job list in a canonical format
 int jl_print(jlist_t * ls) {
 	int ret;
 	jnode_t * cur;
@@ -212,7 +217,7 @@ int jl_print(jlist_t * ls) {
 	printf("Jobs:\n");
 
 	for (cur = ls->head; cur != NULL; cur = cur->next) {
-		printf("%c[%d] %s\n",' ',cur->jid, cur->task->command); // TODO: Make the printing a little more useful
+		printf("%c[%d] %s\n",' ',cur->jid, cur->task->command); 
 	}
 
 end:	
@@ -232,6 +237,7 @@ int jl_inactive_nd(jnode_t * nd)
 	return !ret;
 }
 
+// Find job with the task with the pid and sets it inactive
 int jl_set_inactive_pid(jnode_t *nd, int pid)
 {
 	task_t * tk;
@@ -247,7 +253,7 @@ int jl_set_inactive_pid(jnode_t *nd, int pid)
 }
 
 
-// Deprecated
+// Deprecated, here because I don't have the heart to delete it
 int jl_clear_pid(jlist_t * jl, jnode_t * nd, int pid)
 {
 	int ret = 0;	

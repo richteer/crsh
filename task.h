@@ -3,14 +3,17 @@
 
 #define IN_NOTFOUND -1
 
+// Individual task, like `ls -l`. Piped command lines translate into a linked list of tasks
 typedef struct task_s {
 	char * command;
 	char ** argv;
-	struct task_s * pipe;
-	struct task_s * pipep;
-	int active;
-	int pid;
-	int bg;
+	struct task_s * pipe;  // Command after the current in the pipeline
+	struct task_s * pipep; // Command before the current in the pipeline
+	int active;            // If the task has not completed (i.e. exited)
+	int pid;               // PID when the task in exec'd
+	int bg;                // Boolean if the task is supposed to be backgrounded
+
+	// File descriptors for I/O redirection
 	int in;
 	int out;
 	int err;

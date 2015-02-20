@@ -33,7 +33,7 @@ struct in_cmd_s in_cmdlist[] = {
 
 int in_numcmd = sizeof(in_cmdlist)/sizeof(struct in_cmd_s);
 
-
+// Check if a task is an internally handled command (like cd), execute if it is, return NOTFOUND otherwise
 int in_tryint(state_t * st, task_t * tk)
 {
 	int i;
@@ -49,6 +49,7 @@ int in_tryint(state_t * st, task_t * tk)
 
 /******* SEA OF INTERNAL COMMANDS ********/
 
+// Change current working directory
 int inc_cd(state_t * st, task_t * tk)
 {
 	
@@ -64,6 +65,7 @@ int inc_cd(state_t * st, task_t * tk)
 	return 0;
 }
 
+// Bring a backgrounded task to the foreground
 int inc_fg(state_t * st, task_t * tk)
 {
 	jnode_t * nd;
@@ -90,6 +92,7 @@ int inc_fg(state_t * st, task_t * tk)
 	return 0;
 }
 
+// Repeat a previous command from history
 int inc_rp(state_t * st, task_t * tk)
 {
 	int event, i, n, count;
@@ -177,6 +180,7 @@ done:
 	return 0;
 }
 
+// Terminate (SIGKILL) a job
 int inc_term(state_t * st, task_t * tk)
 {
 	jnode_t * nd;
@@ -193,8 +197,6 @@ int inc_term(state_t * st, task_t * tk)
 		return 2;
 	}
 
-//	jl_rem_node(st->jobs, nd);
-
 	for (t = nd->task; t != NULL; t = t->pipe) {
 		kill(t->pid, SIGKILL);
 	}
@@ -202,6 +204,7 @@ int inc_term(state_t * st, task_t * tk)
 	return 0;
 }
 
+// Show the currently running jobs
 int inc_jobs(state_t * st, task_t * tk)
 {
 	jl_print(st->jobs);
@@ -209,6 +212,7 @@ int inc_jobs(state_t * st, task_t * tk)
 	return 0;
 }
 
+// Exit the shell
 int inc_exit(state_t * st, task_t * tk)
 {
 	st->exit = 1;
@@ -216,6 +220,7 @@ int inc_exit(state_t * st, task_t * tk)
 	return 0;
 }
 
+// Show the command history
 int inc_history(state_t * st, task_t * tk)
 {
 	FILE * histfile;
@@ -261,6 +266,7 @@ int inc_history(state_t * st, task_t * tk)
 	return 0;
 }
 
+// Show the man page, if not found, show an inadequate explanation of internal commands
 int inc_help(state_t * st, task_t * tk)
 {
 	char * page;

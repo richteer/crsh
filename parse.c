@@ -16,6 +16,7 @@
 #define ST_ARGSPACE 0x4
 #define ST_REDIRECT 0x5
 
+// Parses a command line and generates a task object 
 static task_t * gentask(char * line)
 {
 	int state = ST_START;
@@ -82,7 +83,6 @@ static task_t * gentask(char * line)
 						error("Wat\n");
 				}
 				*c = '\0';
-				//c++;
 				argv[numargs] = calloc(1,strlen(arg_begin)+1);
 				strcpy(argv[numargs],arg_begin);
 				break;
@@ -159,6 +159,7 @@ end:
 	return tk;
 }
 
+// Write a task to the history
 static int writetohistory(task_t * tk)
 {
 	char ** c;
@@ -187,6 +188,7 @@ static int writetohistory(task_t * tk)
 	return 0;
 }
 
+// Entry point to begin the parsing into a task object
 int parse(state_t * st, char * line)
 {
 	int ret;

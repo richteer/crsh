@@ -4,7 +4,6 @@
 
 FILE * errlog = NULL;
 
-// TODO: Make this fprintf like
 int error(char * str)
 {
 	if (errlog == NULL) return -1;
