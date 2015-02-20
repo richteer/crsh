@@ -20,14 +20,6 @@ static int tk_run(state_t * st, task_t * tk)
 		tk->out = pipes[1];
 		tk->pipe->in  = pipes[0];
 	}
-/*
-	printf("Running task: '%s", tk->command);
-	char ** t;
-	for (t = tk->argv; *t != NULL; t++)
-		printf(" %s",*t);
-	printf("' FDs: %d %d %d",tk->out, tk->in, tk->err);
-	printf(" Pipe: %p\n", tk->pipe);
-*/
 	tk->active = 1;
 	pid = fork();
 	if (pid) { 
