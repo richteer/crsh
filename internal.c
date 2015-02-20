@@ -13,6 +13,7 @@ int inc_term(state_t *, task_t *);
 int inc_jobs(state_t *, task_t *);
 int inc_exit(state_t *, task_t *);
 int inc_history(state_t *, task_t *);
+int inc_help(state_t *, task_t *);
 
 struct in_cmd_s {
 	char cmd[32];
@@ -27,6 +28,7 @@ struct in_cmd_s in_cmdlist[] = {
 	{ "exit", inc_exit },
 	{ "jobs", inc_jobs },
 	{ "history", inc_history },
+	{ "help", inc_help },
 };
 
 int in_numcmd = sizeof(in_cmdlist)/sizeof(struct in_cmd_s);
@@ -255,6 +257,38 @@ int inc_history(state_t * st, task_t * tk)
 	}
 
 	free(buffer);
+
+	return 0;
+}
+
+int inc_help(state_t * st, task_t * tk)
+{
+	char * page;
+
+	if (access("/usr/share/man/man1/crsh.1.gz", F_OK) != -1) {
+		page = calloc(1, sizeof("man crsh"));
+		strcpy(page, "man crsh");
+		parse(st, page);
+		free(page);
+	}
+	else if (access("crsh.1", F_OK) != -1) {
+		page = calloc(1, sizeof("man ./crsh.1"));
+		strcpy(page, "man ./crsh.1");
+		parse(st, page);
+		free(page);
+	}
+	else {
+		printf("Could not find the manpage, reverting to the inadequate built in help...\n");
+		printf("Internal commands:\n");
+		printf("\tcd\t\tChange to a given directory, Can be relative or absolute.\n");
+		printf("\thelp\t\tDisplay the manpage if installed, otherwise shows this text.\n");
+		printf("\tjobs\t\tShow the currently active jobs, with their job ids\n");
+		printf("\tfg\t\tBring a specified job id into the foreground\n");
+		printf("\tterm\t\tTerminate a specified jobs\n");
+		printf("\texit\t\tClose the shell\n");
+		printf("\thistory\t\tShow all previously run commands\n");
+		printf("\trp\t\tRepeat a previous command, as shown by history\n");
+	}
 
 	return 0;
 }
