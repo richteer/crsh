@@ -70,8 +70,6 @@ void handle_sigtstp()
 	jnode_t * nd;
 	task_t * tk;
 
-	printf("Received SIGTSTP, Replaying to jid %d\n",state.fg);
-
 	if (state.fg == -1) {
 		return;
 	}
@@ -83,7 +81,6 @@ void handle_sigtstp()
 	}
 
 	for (tk = nd->task; tk != NULL; tk = tk->pipe) {
-		printf("Sending SIGTSTP to %d\n",tk->pid);
 		kill(tk->pid, SIGTSTP);
 	}
 	state.fg = -1;
@@ -127,6 +124,7 @@ int main(int argc, char ** argv)
 	state.hostname = calloc(1,256);
 	gethostname(state.hostname, 255);
 
+begin:
 	while (!state.exit) {
 		prompt = get_prompt(&state);
 		line = readline(prompt);
@@ -134,7 +132,7 @@ int main(int argc, char ** argv)
 			fputc('\n', stdout);
 			free(line);
 			free(prompt);
-			return 0;
+			break;
 		}
 
 		if (line[0] != '\0') {
@@ -145,6 +143,11 @@ int main(int argc, char ** argv)
 		}
 		free(line);
 		free(prompt);
+	}
+	if (state.jobs->head != NULL) {
+		state.exit = 0;
+		printf("There are still active jobs.\n");
+		goto begin;
 	}
 
 	free(state.dirn);
