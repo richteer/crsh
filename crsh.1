@@ -154,6 +154,15 @@ ls >out.txt #>err.txt
 .RE
 .RE
 .TP
+\fBSuspension\fR
+.RS
+.B crsh
+supports suspending foreground processes by pressing \^Z, and will return to the prompt.
+Suspended processes can be resumed with the 
+.B fg
+internal command.
+.RE
+.TP
 \fBPrompt\fR
 .RS
 The prompt in 
