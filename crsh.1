@@ -1,0 +1,192 @@
+.\"
+.\" MAN PAGE COMMENTS to
+.\"
+.\"	Eric Richter
+.\"	Clarkson University
+.\"	richteer@lastprime.net
+.\"
+.\"	Last Change: Sun Feb 19 18:21:40 EST 2014
+.\"
+.\" bash_builtins, strip all but Built-Ins section
+.if \n(zZ=1 .ig zZ
+.if \n(zY=1 .ig zY
+.TH CRSH 1 "2014 February 19" "Crapply wRitten SHell 0.9"
+.\"
+.\" There's some problem with having a `@'
+.\" in a tagged paragraph with the BSD man macros.
+.\" It has to do with `@' appearing in the }1 macro.
+.\" This is a problem on 4.3 BSD and Ultrix, but Sun
+.\" appears to have fixed it.
+.\" If you're seeing the characters
+.\" `@u-3p' appearing before the lines reading
+.\" `possible-hostname-completions
+.\" and `complete-hostname' down in READLINE,
+.\" then uncomment this redefinition.
+.\"
+.de }1
+.ds ]X \&\\*(]B\\
+.nr )E 0
+.if !"\\$1"" .nr )I \\$1n
+.}f
+.ll \\n(LLu
+.in \\n()Ru+\\n(INu+\\n()Iu
+.ti \\n(INu
+.ie !\\n()Iu+\\n()Ru-\w\\*(]Xu-3p \{\\*(]X
+.br\}
+.el \\*(]X\h|\\n()Iu+\\n()Ru\c
+.}f
+..
+.\"
+.\" File Name macro.  This used to be `.PN', for Path Name,
+.\" but Sun doesn't seem to like that very much.
+.\"
+.de FN
+\fI\|\\$1\|\fP
+..
+.SH NAME
+crsh \- Crappily wRitten SHell
+.SH DESCRIPTION
+.B crsh
+(pronounced "crash") is a command shell written from scratch, inspired by 
+.B Bash.
+.B crsh
+utilizes similar syntax and control, though by nature is a bit more restrictive. Most notably,
+.B crsh
+lacks a scripting language interpreter, thus is not as flexible as say, 
+.B Bash.
+.SH USAGE
+.RS
+[user@hostname]$ <command> [argspace] [ | <command> ...] [&]
+.RE
+.PP
+Much like other shells, commands are read in from 
+.B stdin
+and are executed accordingly. Internally, a task is created for each command, and executed as a job.
+Jobs can be run in the foreground or background, and running jobs are visible by use of the internal 
+.B jobs
+command (See the INTERNAL COMMANDS section).
+Arguments need to be separated by a least one space, and at the current moment of writing this documentation, quotes or escaped spaces are not supported.
+If a job is to be backgrounded, the ampersand MUST be the last character of the line.
+
+.B crsh
+supports a few other bash-like features.
+I/O Redirection is supported in the form of pipes and reading/writing from/to a file, in a form similar to bash.
+.B crsh
+also supports history, and writes to
+.I $HOME/.crsh_history
+for each command run.
+Thanks to readline, tab-completion is supported for files, however not for commands.
+See the FEATURES section for more details on the abilities detailed here.
+
+.SH FEATURES
+\fBJobs\fR
+.RS
+Running a command like ls is considered a task, and a job is a group of piped tasks.
+So, ls | grep would be a job with two tasks.
+Jobs, not individual tasks, can be backgrounded by supplying an ampersand at the end of the input line.
+The ampersand must be the last character, otherwise it is considered a parse error, and the job will not be run at all.
+The list of running jobs can be seen with the internal command
+.B jobs.
+Jobs are listed in the following format:
+.RS
+[jobid] command line
+.RE
+where job ID is the corresponding number assigned to the execution of that particular command line entry.
+This job ID can be used as arguments to the internal commands
+.B fg
+ and
+.B term.
+.B fg
+brings a backgrounded job into the foreground, and
+.B term
+terminates the entire job.
+.RE
+.TP
+\fBPipes\fR
+.RS
+.RS
+cmd1 | cmd2
+.RE
+Command piping is supported using a bash-like syntax.
+In the above example,
+.B stdout
+from cmd1 is fed into the stdin of
+.B cmd2.
+.PP
+At its current state, piping between more than two commands is broken, and may lead to unexpected behavior.
+.RE
+.TP
+\fBHistory\fR
+.RS
+All commands are written to
+.I $HOME/.crsh_history
+, and can be viewed with the
+.B history
+internal command.
+Previous commands can be reinvoked by calling the internal command
+.B rp
+or with the bash-like syntax, 
+.B \!NUM
+, where NUM is the history command number.
+Negative values are also supported, and refer to the number of commands previous to the most recent.
+.RE
+.TP
+\fBI/O Redirection\fR
+.RS
+ Input and output on 
+.B stdin
+,
+.B stdout
+, and 
+.B stderr
+by using the appropriate operator followed immediately by the file name after the command name, in the argument space.
+.PP
+>[filename] - send stdout to [filename].
+.PP
+#[filename] - send stderr to [filename].
+.PP
+<[filename] - read in from [filename] to stdin.
+.PP
+.B
+EXAMPLE
+.RS
+ls >out.txt #>err.txt
+.RE
+.RE
+.TP
+\fBPrompt\fR
+.RS
+The prompt in 
+.B crsh
+is currently unconfigurable, and simply displays your username, hostname, and the current working directory.
+A unique feature of the prompt in
+.B crsh
+is that it changes in color with every command entered.
+The intent is to make it simpler to trace where the last command entered is in the mess of program output.
+It also looks cool.
+.RE
+.SH INTERNAL COMMANDS
+.TP
+\fBcd\fR NAME
+Change to the supplied directory. This may be a relative path or an absolute path.
+.TP
+\fBhelp\fR
+Show this man page (if available). Otherwise list the internal commands and an inadequate description.
+.TP
+\fBjobs\fR
+Show the current jobs with their corresponding job IDs.
+.TP
+\fBfg\fR JOBID
+Bring a backgrounded job
+.TP
+\fBexit\fR
+Close the shell
+.TP
+\fBrp\fR NUM
+Replay from history the NUMth command. If NUM is negative, the command replayed is selected relative to the previous command (e.g. -1 is the previous command). You can also use !NUM instead.
+.SH BUGS
+Piping more than once does not work properly.
+.PP
+Most error handling code leaks memory.
+.SH COPYRIGHT
+.if n crsh is Copyright (C) 2015 Eric Richter
